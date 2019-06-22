@@ -103,10 +103,10 @@ def main():
 
     history = model.fit_generator(
         train_data_gen,
-        steps_per_epoch=int(np.ceil(train_data_gen.n / float(batch_size))),
+        steps_per_epoch=train_data_gen.__len__(),
         epochs=epochs,
         validation_data=val_data_gen,
-        validation_steps=int(np.ceil(val_data_gen.n / float(batch_size))),
+        validation_steps=train_data_gen.__len__(),
         callbacks=[early_stop, reduce_lr, checkpoint]
     )
 
@@ -115,7 +115,7 @@ def main():
 
     metrics = model.evaluate_generator(
         test_data_gen,
-        steps=int(np.ceil(test_data_gen.n / float(batch_size))),
+        steps=train_data_gen.__len__(),
         verbose=1
     )
 

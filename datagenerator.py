@@ -91,6 +91,8 @@ if __name__=='__main__':
     base_dir = os.path.join(cwd, DATASET_DIR, 'mfcc_fma_small', 'train')
 
     gen = DataSequence(base_dir, 64, True)
-
-    batch = gen[0][0][0].shape
-    print(gen.n)
+    print(int(np.floor(gen.n / float(64))))
+    #
+    # for i in range(gen.__len__() - 1, 0,-1):
+    #     x, y = gen.__getitem__(i)
+    #     print("{}: {}".format(i, x.shape))
