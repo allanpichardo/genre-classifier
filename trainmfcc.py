@@ -87,7 +87,7 @@ def get_model(input_shape):
 def main():
     checkpoint_file = os.path.join(cwd, 'checkpoints', 'genre.best.hdf5')
 
-    ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H_%M_%S')
     if not os.path.exists(os.path.join(cwd, 'log_dir', ts)):
         os.makedirs(os.path.join(cwd, 'log_dir', ts))
     log_dir = os.path.join(cwd, 'log_dir', ts)
