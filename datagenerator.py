@@ -93,6 +93,6 @@ if __name__=='__main__':
     gen = DataSequence(base_dir, 64, True)
     print(int(np.floor(gen.n / float(64))))
     #
-    # for i in range(gen.__len__() - 1, 0,-1):
-    #     x, y = gen.__getitem__(i)
-    #     print("{}: {}".format(i, x.shape))
+    for i in range(gen.__len__() - 1, 0,-1):
+        x, y = gen.__getitem__(i)
+        print("{}: {}".format(i, x.shape))

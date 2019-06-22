@@ -1,6 +1,9 @@
 dataset/
 .DS_Store
 .idea/
+checkpoints/
+models/
+log_dir/
 
 # Created by https://www.gitignore.io/api/intellij+iml
 # Edit at https://www.gitignore.io/?templates=intellij+iml

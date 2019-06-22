@@ -1,6 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import datetime
 import os
+import time
+
 import numpy as np
 import glob
 import shutil
@@ -73,7 +76,7 @@ def get_model(input_shape):
 
     model.add(Dense(8, activation='softmax'))
 
-    sgd = tf.keras.optimizers.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
+    sgd = tf.keras.optimizers.SGD(lr=0.003, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
 
     model.compile(optimizer=sgd,
                   loss='categorical_crossentropy',
@@ -83,16 +86,21 @@ def get_model(input_shape):
 
 def main():
     checkpoint_file = os.path.join(cwd, 'checkpoints', 'genre.best.hdf5')
-    log_dir = os.path.join(cwd, 'log_dir')
+
+    ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    if not os.path.exists(os.path.join(cwd, 'log_dir', ts)):
+        os.makedirs(os.path.join(cwd, 'log_dir', ts))
+    log_dir = os.path.join(cwd, 'log_dir', ts)
+
     model_file = os.path.join(cwd, 'models', 'genre.h5')
 
     checkpoint = tf.keras.callbacks.ModelCheckpoint(checkpoint_file, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
-    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
+    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_images=True)
     reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.8,
                                                      patience=10, min_lr=0.0001)
     early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=50)
 
-    epochs = 100
+    epochs = 1000
 
     train_data_gen = get_train_generator()
     val_data_gen = get_validation_generator()
@@ -107,7 +115,7 @@ def main():
         epochs=epochs,
         validation_data=val_data_gen,
         validation_steps=train_data_gen.__len__(),
-        callbacks=[early_stop, reduce_lr, checkpoint]
+        callbacks=[early_stop, reduce_lr, checkpoint, tensorboard]
     )
 
     model.load_weights(checkpoint_file)
