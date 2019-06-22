@@ -31,7 +31,7 @@ class DataSequence(Sequence):
         self.classes = classes
         self.bsz = batch_size
         self.shuffle = shuffle
-        self.n = len(df.index)
+        self.n = self.round(len(df.index), batch_size)
         self.indexes = random.sample(range(self.n), k=self.n)
 
         # Take labels and a list of image locations in memory
@@ -41,6 +41,13 @@ class DataSequence(Sequence):
 
     def __len__(self):
         return int(math.floor(self.n / float(self.bsz)))
+
+    def round(self, n, multiple):
+        # Smaller multiple
+        a = (n // multiple) * multiple
+
+        # Return of closest of two
+        return a
 
     def on_epoch_end(self):
         self.indexes = range(self.n)
@@ -86,4 +93,4 @@ if __name__=='__main__':
     gen = DataSequence(base_dir, 64, True)
 
     batch = gen[0][0][0].shape
-    print(batch)
+    print(gen.n)
