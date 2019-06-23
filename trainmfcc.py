@@ -12,7 +12,7 @@ import zipfile
 from datagenerator import DataSequence
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, LSTM
+from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, LSTM, AveragePooling1D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 DATASET_DIR = "dataset"
@@ -23,7 +23,7 @@ train_dir = os.path.join(base_dir, 'train')
 val_dir = os.path.join(base_dir, 'val')
 test_dir = os.path.join(base_dir, 'test')
 
-batch_size = 8
+batch_size = 64
 classes = ['Electronic', 'Experimental', 'Folk', 'Hip-Hop', 'Instrumental', 'International', 'Pop', 'Rock']
 
 
@@ -50,33 +50,30 @@ def get_input_shape(generator: DataSequence):
 def get_model(input_shape):
     model = Sequential()
 
-    model.add(Conv1D(64, 3, padding='same', activation='relu', input_shape=input_shape))
-    model.add(MaxPooling1D(pool_size=2))
-
-    model.add(Dropout(0.2))
+    model.add(Conv1D(128, 3, padding='same', activation='relu', input_shape=input_shape))
     model.add(Conv1D(128, 3, padding='same', activation='relu'))
     model.add(MaxPooling1D(pool_size=2))
-
-    model.add(Dropout(0.2))
-    model.add(LSTM(64, return_sequences=True, activation='relu'))
-    model.add(Dropout(0.2))
-
-    model.add(Conv1D(128, 3, padding='same', activation='relu'))
+    model.add(Conv1D(256, 3, padding='same', activation='relu'))
+    model.add(Conv1D(256, 3, padding='same', activation='relu'))
     model.add(MaxPooling1D(pool_size=2))
+    model.add(Conv1D(512, 3, padding='same', activation='relu'))
+    model.add(Conv1D(512, 3, padding='same', activation='relu'))
+    model.add(AveragePooling1D(pool_size=2))
 
-    model.add(Dropout(0.2))
-    model.add(LSTM(64, return_sequences=False, activation='relu'))
-
-    # model.add(Flatten())
-
-    # model.add(Dense(64, activation='relu'))
     # model.add(Dropout(0.2))
-    # model.add(Dense(64, activation='relu'))
-    model.add(Dropout(0.2))
+    # model.add(LSTM(64, return_sequences=True, activation='relu'))
+    # model.add(LSTM(64, return_sequences=True, activation='relu'))
+    # model.add(LSTM(64, return_sequences=False, activation='relu'))
+
+    model.add(Flatten())
+    model.add(Dropout(0.25))
+
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(0.5))
 
     model.add(Dense(8, activation='softmax'))
 
-    sgd = tf.keras.optimizers.SGD(lr=0.003, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
+    sgd = tf.keras.optimizers.SGD(lr=1e-5, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
 
     model.compile(optimizer=sgd,
                   loss='categorical_crossentropy',
@@ -115,7 +112,7 @@ def main():
         epochs=epochs,
         validation_data=val_data_gen,
         validation_steps=train_data_gen.__len__(),
-        callbacks=[early_stop, reduce_lr, checkpoint, tensorboard]
+        callbacks=[early_stop, checkpoint, tensorboard]
     )
 
     model.load_weights(checkpoint_file)
