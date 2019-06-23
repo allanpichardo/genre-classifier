@@ -12,7 +12,7 @@ import zipfile
 from datagenerator import DataSequence
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, LSTM, GRU
+from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, LSTM, GRU, AveragePooling1D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 DATASET_DIR = "dataset"
@@ -23,22 +23,22 @@ train_dir = os.path.join(base_dir, 'train')
 val_dir = os.path.join(base_dir, 'val')
 test_dir = os.path.join(base_dir, 'test')
 
-batch_size = 8
+batch_size = 64
 classes = ['Electronic', 'Experimental', 'Folk', 'Hip-Hop', 'Instrumental', 'International', 'Pop', 'Rock']
 
 
 def get_train_generator():
-    train_data_gen = DataSequence(train_dir, batch_size, shuffle=True)
+    train_data_gen = DataSequence(train_dir, batch_size, shuffle=True, classes=classes)
     return train_data_gen
 
 
 def get_validation_generator():
-    val_data_gen = DataSequence(val_dir, batch_size)
+    val_data_gen = DataSequence(val_dir, batch_size, classes=classes)
     return val_data_gen
 
 
 def get_test_generator():
-    val_data_gen = DataSequence(test_dir, batch_size)
+    val_data_gen = DataSequence(test_dir, batch_size, classes=classes)
     return val_data_gen
 
 
@@ -83,6 +83,7 @@ def get_model(input_shape):
     # model.add(LSTM(64, return_sequences=False, activation='relu'))
 
     # model.add(Flatten())
+    # model.add(Dropout(0.25))
 
     # model.add(Dense(64, activation='relu'))
     # model.add(Dropout(0.2))
@@ -130,7 +131,7 @@ def main():
         epochs=epochs,
         validation_data=val_data_gen,
         validation_steps=train_data_gen.__len__(),
-        callbacks=[early_stop, reduce_lr, checkpoint, tensorboard]
+        callbacks=[early_stop, checkpoint, tensorboard]
     )
 
     model.load_weights(checkpoint_file)
