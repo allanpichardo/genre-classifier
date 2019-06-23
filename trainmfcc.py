@@ -28,17 +28,17 @@ classes = ['Electronic', 'Experimental', 'Folk', 'Hip-Hop', 'Instrumental', 'Int
 
 
 def get_train_generator():
-    train_data_gen = DataSequence(train_dir, batch_size, shuffle=True)
+    train_data_gen = DataSequence(train_dir, batch_size, shuffle=True, classes=classes)
     return train_data_gen
 
 
 def get_validation_generator():
-    val_data_gen = DataSequence(val_dir, batch_size)
+    val_data_gen = DataSequence(val_dir, batch_size, classes=classes)
     return val_data_gen
 
 
 def get_test_generator():
-    val_data_gen = DataSequence(test_dir, batch_size)
+    val_data_gen = DataSequence(test_dir, batch_size, classes=classes)
     return val_data_gen
 
 
@@ -60,10 +60,10 @@ def get_model(input_shape):
     model.add(Conv1D(512, 3, padding='same', activation='relu'))
     model.add(AveragePooling1D(pool_size=2))
 
-    # model.add(Dropout(0.2))
-    # model.add(LSTM(64, return_sequences=True, activation='relu'))
-    # model.add(LSTM(64, return_sequences=True, activation='relu'))
-    # model.add(LSTM(64, return_sequences=False, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(LSTM(64, return_sequences=True, activation='relu'))
+    model.add(LSTM(64, return_sequences=True, activation='relu'))
+    model.add(LSTM(64, return_sequences=False, activation='relu'))
 
     model.add(Flatten())
     model.add(Dropout(0.25))
@@ -73,7 +73,7 @@ def get_model(input_shape):
 
     model.add(Dense(8, activation='softmax'))
 
-    sgd = tf.keras.optimizers.SGD(lr=1e-5, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
+    sgd = tf.keras.optimizers.SGD(lr=1e-6, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
 
     model.compile(optimizer=sgd,
                   loss='categorical_crossentropy',
