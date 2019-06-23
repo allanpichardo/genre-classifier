@@ -32,7 +32,8 @@ class DataSequence(Sequence):
         self.bsz = batch_size
         self.shuffle = shuffle
         self.n = self.round(len(df.index), batch_size)
-        self.indexes = random.sample(range(self.n), k=self.n)
+        # self.indexes = random.sample(range(self.n), k=self.n)
+        self.indexes = range(self.n)
 
         # Take labels and a list of image locations in memory
         self.labels = tensorflow.keras.utils.to_categorical(self.df['label'].values, num_classes=len(self.classes)) if class_format=='categorical' else self.df['label'].values
