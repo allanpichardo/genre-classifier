@@ -80,7 +80,7 @@ class DataSequence(Sequence):
         return df.values
 
     def normalize(self, df: DataFrame):
-        return (df - df.min()) / (df.max() - df.mean())
+        return (df - df.mean()) / (df.std())
 
 
 
