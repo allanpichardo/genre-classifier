@@ -12,7 +12,7 @@ import zipfile
 from datagenerator import DataSequence
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, LSTM
+from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, LSTM, GRU
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 DATASET_DIR = "dataset"
@@ -50,33 +50,48 @@ def get_input_shape(generator: DataSequence):
 def get_model(input_shape):
     model = Sequential()
 
-    model.add(Conv1D(64, 3, padding='same', activation='relu', input_shape=input_shape))
-    model.add(MaxPooling1D(pool_size=2))
+    model.add(Conv1D(32,kernel_size=3,padding='same',activation='relu'))
+    model.add(MaxPooling1D(pool_size=3))
+    model.add(Dropout(0.3))
+    model.add(Conv1D(64,kernel_size=3,padding='same',activation='relu'))
+    model.add(MaxPooling1D(pool_size=3))
+    model.add(Dropout(0.35))
+    model.add(Conv1D(128,kernel_size=3,padding='same',activation='relu'))
+    model.add(MaxPooling1D(pool_size=3))
+    model.add(Dropout(0.4))
+    model.add(GRU(50,return_sequences=True))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128,activation='relu'))
+    model.add(Dropout(0.45))
 
-    model.add(Dropout(0.2))
-    model.add(Conv1D(128, 3, padding='same', activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
-
-    model.add(Dropout(0.2))
-    model.add(LSTM(64, return_sequences=True, activation='relu'))
-    model.add(Dropout(0.2))
-
-    model.add(Conv1D(128, 3, padding='same', activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
-
-    model.add(Dropout(0.2))
-    model.add(LSTM(64, return_sequences=False, activation='relu'))
+    # model.add(Conv1D(64, 3, padding='same', activation='relu', input_shape=input_shape))
+    # model.add(MaxPooling1D(pool_size=2))
+    #
+    # model.add(Dropout(0.2))
+    # model.add(Conv1D(128, 3, padding='same', activation='relu'))
+    # model.add(MaxPooling1D(pool_size=2))
+    #
+    # model.add(Dropout(0.2))
+    # model.add(LSTM(64, return_sequences=True, activation='relu'))
+    # model.add(Dropout(0.2))
+    #
+    # model.add(Conv1D(128, 3, padding='same', activation='relu'))
+    # model.add(MaxPooling1D(pool_size=2))
+    #
+    # model.add(Dropout(0.2))
+    # model.add(LSTM(64, return_sequences=False, activation='relu'))
 
     # model.add(Flatten())
 
     # model.add(Dense(64, activation='relu'))
     # model.add(Dropout(0.2))
     # model.add(Dense(64, activation='relu'))
-    model.add(Dropout(0.2))
+    # model.add(Dropout(0.2))
 
     model.add(Dense(8, activation='softmax'))
 
-    sgd = tf.keras.optimizers.SGD(lr=0.003, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
+    sgd = tf.keras.optimizers.SGD(lr=1e-5, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
 
     model.compile(optimizer=sgd,
                   loss='categorical_crossentropy',
