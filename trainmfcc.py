@@ -28,17 +28,17 @@ classes = ['Electronic', 'Experimental', 'Folk', 'Hip-Hop', 'Instrumental', 'Int
 
 
 def get_train_generator():
-    train_data_gen = DataSequence(train_dir, batch_size, shuffle=True, classes=classes)
+    train_data_gen = DataSequence(train_dir, batch_size, shuffle=True, classes=classes, class_format='categorical')
     return train_data_gen
 
 
 def get_validation_generator():
-    val_data_gen = DataSequence(val_dir, batch_size, classes=classes)
+    val_data_gen = DataSequence(val_dir, batch_size, classes=classes, class_format='categorical')
     return val_data_gen
 
 
 def get_test_generator():
-    val_data_gen = DataSequence(test_dir, batch_size, classes=classes)
+    val_data_gen = DataSequence(test_dir, batch_size, classes=classes, class_format='categorical')
     return val_data_gen
 
 
@@ -48,21 +48,25 @@ def get_input_shape(generator: DataSequence):
 
 
 def get_model(input_shape):
+    print("Input Shape: {}".format(input_shape))
     model = Sequential()
 
-    model.add(Conv1D(32,kernel_size=3,padding='same',activation='relu'))
+    model.add(Conv1D(256,kernel_size=3,padding='same',activation='relu', input_shape=input_shape))
+    model.add(Conv1D(512,kernel_size=3,padding='same',activation='relu'))
     model.add(MaxPooling1D(pool_size=3))
     model.add(Dropout(0.3))
-    model.add(Conv1D(64,kernel_size=3,padding='same',activation='relu'))
+    model.add(Conv1D(512,kernel_size=3,padding='same',activation='relu'))
+    model.add(Conv1D(1024,kernel_size=3,padding='same',activation='relu'))
     model.add(MaxPooling1D(pool_size=3))
     model.add(Dropout(0.35))
-    model.add(Conv1D(128,kernel_size=3,padding='same',activation='relu'))
+    model.add(Conv1D(1024,kernel_size=3,padding='same',activation='relu'))
+    model.add(Conv1D(1024,kernel_size=3,padding='same',activation='relu'))
     model.add(MaxPooling1D(pool_size=3))
     model.add(Dropout(0.4))
-    model.add(GRU(50,return_sequences=True))
-    model.add(Dropout(0.25))
+    # model.add(GRU(256,return_sequences=True))
+    # model.add(Dropout(0.25))
     model.add(Flatten())
-    model.add(Dense(128,activation='relu'))
+    model.add(Dense(512,activation='relu'))
     model.add(Dropout(0.45))
 
     # model.add(Conv1D(64, 3, padding='same', activation='relu', input_shape=input_shape))
@@ -93,6 +97,7 @@ def get_model(input_shape):
     model.add(Dense(8, activation='softmax'))
 
     sgd = tf.keras.optimizers.SGD(lr=1e-5, decay=1e-6, momentum=0.9, nesterov=True, clipvalue=1.0)
+    adam = tf.keras.optimizers.Adam(lr=1e-5)
 
     model.compile(optimizer=sgd,
                   loss='categorical_crossentropy',
